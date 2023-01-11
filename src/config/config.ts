@@ -4,8 +4,8 @@ dotenv.config();
 
 const MYSQL_HOST = process.env.MYSQL_HOST || 'localhost';
 const MYSQL_DATABASE = process.env.MYSQL_DATABASE || 'rightweatherdb';
-const MYSQL_USER = process.env.MYSQL_HOST || 'user';
-const MYSQL_PASS = process.env.MYSQL_HOST || 'password1';
+const MYSQL_USER = process.env.MYSQL_HOST || 'root';
+const MYSQL_PASS = process.env.MYSQL_HOST || 'P@ssword1!';
 
 const MYSQL = {
     host: MYSQL_HOST,

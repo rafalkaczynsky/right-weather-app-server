@@ -1,11 +1,12 @@
 import express from 'express';
-import controller from '../controllers/user'
+import controller from '../controllers/user';
+import extractJWT from '../middleware/extractJWT';
 
 const router  = express.Router();
 
-router.get('/validate', controller.validateToken);
+router.get('/validate', extractJWT, controller.validateToken);
 router.post('/register', controller.register);
 router.post('/login', controller.login);
-router.get('/getAllUSers', controller.getAllUsers);
+router.get('/getAllUsers', controller.getAllUsers);
 
 export = router;
