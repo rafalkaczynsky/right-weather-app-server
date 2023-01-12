@@ -10,7 +10,7 @@ import IMySQLResult from "../interfaces/result";
 //Help keep track of loggs
 const NAMESPACE = "User";
 
-// Protecing route that we need for testing if user is authenticating properly
+// Protected route that we need for testing if user is authenticating properly
 const validateToken = (req: Request, res: Response, next: NextFunction) => {
     logging.info(NAMESPACE, "User has been authorised");
 
@@ -21,7 +21,7 @@ const validateToken = (req: Request, res: Response, next: NextFunction) => {
 
 // Creating user and storing user in database
 const register = (req: Request, res: Response, next: NextFunction) => {
-    const {username, password} = req.body;
+    const {firstName, lastName, username, password} = req.body;
 
 
     //Salting and hashing unecrypted password 
@@ -33,7 +33,7 @@ const register = (req: Request, res: Response, next: NextFunction) => {
             })
         }
 
-        let query = `INSERT INTO users (username, password) VALUES ("${username}", "${hash}")`;
+        let query = `INSERT INTO users (firstName, lastName, username, password) VALUES ("${firstName}", "${lastName}", "${username}", "${hash}")`;
         Connect().then(connection => {
             Query(connection, query).then((result) => {
                 // logging.info(NAMESPACE, `User with id ${result.insertId} inserted`);
@@ -60,25 +60,17 @@ const register = (req: Request, res: Response, next: NextFunction) => {
 //Login a user and returning token and user object
 const login = (req: Request, res: Response, next: NextFunction) => {
     let {username, password} = req.body;
-    console.log('req username',  username); 
     let query = `SELECT * FROM users WHERE username = '${username}'`;
 
     Connect().then((connection) => {
         Query<IUser[]>(connection, query).then((users) => {
             bcryptjs.compare(password, users[0].password, (error, result) => {
-                console.log('Czy jest result', result)
-
                 if(error){
                     return res.status(401).json({
                         message: "Incorrect password"
                     });
                 } else if (result){
-                    console.log('Czy jest result', result)
-
-
                     signJWT(users[0], (_error, token) => {
-
-                        console.log('Czy jest token', token)
                         if(_error){
                             return res.status(401).json({
                                 message: "Cant sign JWT",
@@ -116,7 +108,6 @@ const login = (req: Request, res: Response, next: NextFunction) => {
 // Returning all users for testing puproses
 const getAllUsers = (req: Request, res: Response, next: NextFunction) => {
 
-    console.log('Is it getAllUSers request', req)
     let query = `SELECT username FROM users`;
 
     Connect()

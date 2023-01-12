@@ -4,9 +4,11 @@ import extractJWT from '../middleware/extractJWT';
 
 const router  = express.Router();
 
-router.get('/validate', extractJWT, controller.validateToken);
 router.post('/register', controller.register);
 router.post('/login', controller.login);
 router.get('/getAllUsers', controller.getAllUsers);
+
+//Protected route
+router.get('/validate', extractJWT, controller.validateToken);
 
 export = router;
