@@ -33,7 +33,6 @@ const Query = async <T>(connection: mysql.Connection, query: string) =>
             }
 
             resolve(result);
-
             connection.end();
         });
     });

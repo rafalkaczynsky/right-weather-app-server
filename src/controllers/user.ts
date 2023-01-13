@@ -22,14 +22,12 @@ const validateToken = (req: Request, res: Response, next: NextFunction) => {
 // Creating user and storing user in database
 const register = (req: Request, res: Response, next: NextFunction) => {
     const {firstName, lastName, username, password} = req.body;
-
-
     //Salting and hashing unecrypted password 
     bcryptjs.hash(password, 10, (error, hash) => {
         if(error){
             return res.status(505).json({
                 msg: error.message,
-                error: error,
+                err: error,
             })
         }
 
@@ -59,25 +57,44 @@ const register = (req: Request, res: Response, next: NextFunction) => {
 
 //Login a user and returning token and user object
 const login = (req: Request, res: Response, next: NextFunction) => {
+    console.log('request w login', req)
     let {username, password} = req.body;
     let query = `SELECT * FROM users WHERE username = '${username}'`;
 
     Connect().then((connection) => {
-        Query<IUser[]>(connection, query).then((users) => {
+        Query<IUser[]>(connection, query).then((_users) => {
+           const users = JSON.parse(JSON.stringify(_users));
+
+            if(!users || users?.length === 0) {
+                return res.status(404).json({
+                    message: "User not found!",
+                    err: "User not found!"
+                });
+            }
+
             bcryptjs.compare(password, users[0].password, (error, result) => {
+                if(!error && !result) {
+                    return res.status(401).json({
+                        message: "Incorrect password",
+                        err: "Incorrect password",
+                    });
+                }
                 if(error){
                     return res.status(401).json({
-                        message: "Incorrect password"
+                        message: "Incorrect password",
+                        err: error,
                     });
                 } else if (result){
                     signJWT(users[0], (_error, token) => {
                         if(_error){
                             return res.status(401).json({
                                 message: "Cant sign JWT",
-                                error: _error
+                                err: _error
                             });
                         } else if (token)
                         {
+                            delete users[0].password;
+
                             return res.status(200).json({
                                 message: "Authorised",
                                 token: token,
@@ -88,6 +105,7 @@ const login = (req: Request, res: Response, next: NextFunction) => {
                 }
             });
         }).catch( err => {
+            console.log('Czyto tu 1', err)
             logging.error(NAMESPACE, err.message, err);
 
             return res.status(500).json({
@@ -97,6 +115,7 @@ const login = (req: Request, res: Response, next: NextFunction) => {
         });
     }).catch( err => {
         logging.error(NAMESPACE, err.message, err);
+        console.log('Czyto tu 2', err)
 
         return res.status(500).json({
             message: err.message,
@@ -124,7 +143,7 @@ const getAllUsers = (req: Request, res: Response, next: NextFunction) => {
 
                     return res.status(500).json({
                         message: error.message,
-                        error
+                        err: error
                     });
                 });
         })

@@ -8,7 +8,8 @@ router.post('/register', controller.register);
 router.post('/login', controller.login);
 router.get('/getAllUsers', controller.getAllUsers);
 
-//Protected route
+//Protected routes
 router.get('/validate', extractJWT, controller.validateToken);
+
 
 export = router;
